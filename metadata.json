@@ -1,0 +1,6 @@
+{
+  "name": "iContacts",
+  "description": "iPhone-style Phone dialer and contact manager with multiple VCF file import, export, and contact purge tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
