@@ -3,7 +3,6 @@ package com.example.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -21,28 +20,30 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.IosBlue
+import com.example.ui.theme.LiquidCyan
+import com.example.ui.theme.LiquidTextPrimary
+import com.example.ui.theme.LiquidTextSecondary
 
 @Composable
 fun IosSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    placeholder: String = "Search",
+    placeholder: String = "Search contacts",
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
@@ -52,16 +53,20 @@ fun IosSearchBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(36.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 8.dp),
+                .height(42.dp)
+                .liquidGlass(
+                    shape = RoundedCornerShape(22.dp),
+                    borderWidth = 1.dp,
+                    bgAlpha = 0.12f,
+                    borderAlpha = 0.35f
+                )
+                .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
@@ -71,29 +76,29 @@ fun IosSearchBar(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+                    tint = if (isFocused.value) LiquidCyan else LiquidTextSecondary,
+                    modifier = Modifier.size(19.dp)
                 )
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Box(modifier = Modifier.weight(1f)) {
                     if (query.isEmpty()) {
                         Text(
                             text = placeholder,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 16.sp
+                            color = LiquidTextSecondary.copy(alpha = 0.7f),
+                            fontSize = 15.sp
                         )
                     }
                     BasicTextField(
                         value = query,
                         onValueChange = onQueryChange,
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 16.sp
+                        textStyle = TextStyle(
+                            color = LiquidTextPrimary,
+                            fontSize = 15.sp
                         ),
-                        cursorBrush = SolidColor(IosBlue),
+                        cursorBrush = SolidColor(LiquidCyan),
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
@@ -110,7 +115,7 @@ fun IosSearchBar(
                         Icon(
                             imageVector = Icons.Default.Cancel,
                             contentDescription = "Clear",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = LiquidTextSecondary,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -125,8 +130,8 @@ fun IosSearchBar(
         ) {
             Text(
                 text = "Cancel",
-                color = IosBlue,
-                fontSize = 16.sp,
+                color = LiquidCyan,
+                fontSize = 15.sp,
                 modifier = Modifier
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

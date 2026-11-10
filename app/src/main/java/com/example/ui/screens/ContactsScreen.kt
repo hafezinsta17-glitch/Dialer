@@ -31,17 +31,13 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -56,9 +52,14 @@ import com.example.model.Contact
 import com.example.ui.components.IosAlphabetScrubber
 import com.example.ui.components.IosAvatar
 import com.example.ui.components.IosSearchBar
-import com.example.ui.theme.IosBlue
-import com.example.ui.theme.IosRed
+import com.example.ui.components.LiquidGlassBackground
+import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.liquidGlass
 import com.example.ui.theme.IosYellow
+import com.example.ui.theme.LiquidCyan
+import com.example.ui.theme.LiquidRed
+import com.example.ui.theme.LiquidTextPrimary
+import com.example.ui.theme.LiquidTextSecondary
 import kotlinx.coroutines.launch
 
 @Composable
@@ -82,7 +83,6 @@ fun ContactsScreen(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    // Group contacts by section
     val grouped = remember(contacts) {
         contacts.groupBy { it.sortSection }
             .toSortedMap(compareBy { if (it == "#") "Z1" else it })
@@ -90,10 +90,9 @@ fun ContactsScreen(
 
     val availableSections = remember(grouped) { grouped.keys }
 
-    // Map section header to index in LazyColumn
     val sectionIndices = remember(grouped) {
         val map = mutableMapOf<String, Int>()
-        var currentIndex = 1 // 0 is My Card header
+        var currentIndex = 1
         for ((section, list) in grouped) {
             map[section] = currentIndex
             currentIndex += 1 + list.size
@@ -101,17 +100,17 @@ fun ContactsScreen(
         map
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // iOS Top Header Bar
+    LiquidGlassBackground(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+        ) {
+            // iOS 26 Liquid Header Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -121,62 +120,72 @@ fun ContactsScreen(
                 ) {
                     Text(
                         text = if (isSelectionMode) "Done" else "Select",
-                        color = IosBlue,
-                        fontSize = 17.sp,
-                        fontWeight = if (isSelectionMode) FontWeight.SemiBold else FontWeight.Normal
+                        color = LiquidCyan,
+                        fontSize = 16.sp,
+                        fontWeight = if (isSelectionMode) FontWeight.Bold else FontWeight.Medium
                     )
                 }
 
                 Text(
                     text = "Contacts",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LiquidTextPrimary
                 )
 
                 IconButton(
                     onClick = onAddContactClick,
-                    modifier = Modifier.testTag("add_contact_icon_button")
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .testTag("add_contact_icon_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add Contact",
-                        tint = IosBlue,
-                        modifier = Modifier.size(24.dp)
+                        tint = LiquidCyan,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
 
-            // iOS Search Bar
+            // Liquid Glass Search Bar
             IosSearchBar(
                 query = searchQuery,
                 onQueryChange = onSearchQueryChange
             )
 
             // Contact List with Alphabet Scrubber
-            Box(modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 76.dp) // space for floating dock
+            ) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(end = 20.dp) // space for scrubber
+                        .padding(end = 20.dp)
                 ) {
                     // My Card Header
                     if (searchQuery.isEmpty()) {
                         item {
-                            MyCardRow()
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(start = 72.dp)
-                            )
+                            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                                LiquidGlassCard(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    MyCardRow()
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
 
                     // Grouped contacts by letter
                     for ((section, sectionContacts) in grouped) {
                         item(key = "section_$section") {
-                            SectionHeader(letter = section)
+                            LiquidSectionHeader(letter = section)
                         }
 
                         items(
@@ -196,7 +205,7 @@ fun ContactsScreen(
                                 }
                             )
                             HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                                color = Color.White.copy(alpha = 0.08f),
                                 thickness = 0.5.dp,
                                 modifier = Modifier.padding(start = if (isSelectionMode) 104.dp else 72.dp)
                             )
@@ -208,13 +217,14 @@ fun ContactsScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 24.dp),
+                                .padding(vertical = 28.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "${contacts.size} Contacts",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp
+                                color = LiquidTextSecondary,
+                                fontSize = 14.sp,
+                                letterSpacing = 0.5.sp
                             )
                         }
                     }
@@ -242,7 +252,9 @@ fun ContactsScreen(
             visible = isSelectionMode,
             enter = slideInVertically { it },
             exit = slideOutVertically { it },
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp)
         ) {
             BatchActionBar(
                 selectedCount = selectedContactIds.size,
@@ -261,12 +273,12 @@ fun MyCardRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IosAvatar(
             initials = "ME",
-            colorIndex = 1,
+            colorIndex = 0,
             size = 54.dp
         )
         Spacer(modifier = Modifier.width(14.dp))
@@ -274,31 +286,31 @@ fun MyCardRow() {
             Text(
                 text = "My Card",
                 fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
+                fontWeight = FontWeight.Bold,
+                color = LiquidTextPrimary
             )
             Text(
-                text = "Set up your profile",
+                text = "Liquid ID & profile",
                 fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = LiquidCyan.copy(alpha = 0.85f)
             )
         }
     }
 }
 
 @Composable
-fun SectionHeader(letter: String) {
+fun LiquidSectionHeader(letter: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
         Text(
             text = letter,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = LiquidCyan.copy(alpha = 0.9f),
+            letterSpacing = 1.sp
         )
     }
 }
@@ -314,7 +326,7 @@ fun ContactRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 9.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
             .testTag("contact_row_${contact.id}"),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -322,7 +334,7 @@ fun ContactRow(
             Icon(
                 imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Outlined.Circle,
                 contentDescription = if (isSelected) "Selected" else "Not Selected",
-                tint = if (isSelected) IosBlue else MaterialTheme.colorScheme.outline,
+                tint = if (isSelected) LiquidCyan else Color.White.copy(alpha = 0.35f),
                 modifier = Modifier
                     .size(22.dp)
                     .padding(end = 6.dp)
@@ -333,7 +345,7 @@ fun ContactRow(
         IosAvatar(
             initials = contact.initials,
             colorIndex = contact.avatarColorIndex,
-            size = 42.dp
+            size = 44.dp
         )
 
         Spacer(modifier = Modifier.width(14.dp))
@@ -342,9 +354,9 @@ fun ContactRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = contact.displayName,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = LiquidTextPrimary
                 )
                 if (contact.isFavorite) {
                     Spacer(modifier = Modifier.width(6.dp))
@@ -362,7 +374,7 @@ fun ContactRow(
                 Text(
                     text = subtext,
                     fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = LiquidTextSecondary,
                     maxLines = 1
                 )
             }
@@ -372,7 +384,7 @@ fun ContactRow(
             Icon(
                 imageVector = Icons.Default.PhoneAndroid,
                 contentDescription = "Device Contact",
-                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                tint = LiquidCyan.copy(alpha = 0.4f),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -392,8 +404,12 @@ fun BatchActionBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .liquidGlass(
+                shape = RoundedCornerShape(22.dp),
+                borderWidth = 1.dp,
+                bgAlpha = 0.22f,
+                borderAlpha = 0.5f
+            )
             .padding(14.dp)
     ) {
         Column {
@@ -404,19 +420,19 @@ fun BatchActionBar(
             ) {
                 Text(
                     text = "$selectedCount selected",
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = LiquidTextPrimary
                 )
 
                 Row {
                     if (selectedCount < totalCount) {
                         TextButton(onClick = onSelectAll) {
-                            Text("Select All", color = IosBlue, fontSize = 14.sp)
+                            Text("Select All", color = LiquidCyan, fontSize = 14.sp)
                         }
                     } else {
                         TextButton(onClick = onDeselectAll) {
-                            Text("Deselect", color = IosBlue, fontSize = 14.sp)
+                            Text("Deselect", color = LiquidCyan, fontSize = 14.sp)
                         }
                     }
                 }
@@ -433,17 +449,18 @@ fun BatchActionBar(
                     enabled = selectedCount > 0,
                     modifier = Modifier.weight(1f).testTag("batch_export_button"),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                        containerColor = Color.White.copy(alpha = 0.12f)
+                    ),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.IosShare,
                         contentDescription = "Export VCF",
-                        tint = IosBlue,
+                        tint = LiquidCyan,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Export VCF", color = IosBlue, fontSize = 14.sp)
+                    Text("Export VCF", color = LiquidCyan, fontSize = 14.sp)
                 }
 
                 ElevatedButton(
@@ -451,17 +468,18 @@ fun BatchActionBar(
                     enabled = selectedCount > 0,
                     modifier = Modifier.weight(1f).testTag("batch_purge_button"),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = IosRed.copy(alpha = 0.15f)
-                    )
+                        containerColor = LiquidRed.copy(alpha = 0.25f)
+                    ),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Purge",
-                        tint = IosRed,
+                        tint = LiquidRed,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Purge ($selectedCount)", color = IosRed, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Purge ($selectedCount)", color = LiquidRed, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
         }

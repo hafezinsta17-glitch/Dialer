@@ -31,18 +31,16 @@ import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -52,10 +50,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Contact
 import com.example.ui.components.IosAvatar
-import com.example.ui.theme.IosBlue
-import com.example.ui.theme.IosGreen
-import com.example.ui.theme.IosRed
+import com.example.ui.components.LiquidGlassBackground
+import com.example.ui.components.LiquidGlassCard
+import com.example.ui.components.liquidGlass
 import com.example.ui.theme.IosYellow
+import com.example.ui.theme.LiquidCyan
+import com.example.ui.theme.LiquidEmerald
+import com.example.ui.theme.LiquidRed
+import com.example.ui.theme.LiquidTextPrimary
+import com.example.ui.theme.LiquidTextSecondary
 
 @Composable
 fun ContactDetailScreen(
@@ -71,371 +74,395 @@ fun ContactDetailScreen(
     val context = LocalContext.current
     BackHandler(onBack = onBack)
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-    ) {
-        // Top Navigation Bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextButton(
-                onClick = onBack,
-                modifier = Modifier.testTag("contact_detail_back_button")
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                        contentDescription = "Back",
-                        tint = IosBlue,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Contacts", color = IosBlue, fontSize = 17.sp)
-                }
-            }
-
-            TextButton(
-                onClick = onEdit,
-                modifier = Modifier.testTag("contact_detail_edit_button")
-            ) {
-                Text(text = "Edit", color = IosBlue, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-            }
-        }
-
-        // Profile Avatar & Name
+    LiquidGlassBackground(modifier = modifier) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .statusBarsPadding()
+                .verticalScroll(rememberScrollState())
         ) {
-            IosAvatar(
-                initials = contact.initials,
-                colorIndex = contact.avatarColorIndex,
-                size = 96.dp
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-            Text(
-                text = contact.displayName,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            if (contact.company.isNotBlank() || contact.jobTitle.isNotBlank()) {
-                val sub = listOf(contact.jobTitle, contact.company).filter { it.isNotBlank() }.joinToString(" • ")
-                Text(
-                    text = sub,
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-        }
-
-        // 4 iOS Action Buttons: Message, Call, Video, Mail
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            IosActionButton(
-                icon = Icons.Default.Chat,
-                label = "message",
-                onClick = {
-                    if (contact.primaryPhone.isNotBlank()) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("sms:${contact.primaryPhone}"))
-                        context.startActivity(intent)
-                    }
-                }
-            )
-            IosActionButton(
-                icon = Icons.Default.Call,
-                label = "call",
-                onClick = {
-                    if (contact.primaryPhone.isNotBlank()) {
-                        onCallClick(contact.primaryPhone, contact.displayName)
-                    }
-                }
-            )
-            IosActionButton(
-                icon = Icons.Default.Videocam,
-                label = "video",
-                onClick = {
-                    if (contact.primaryPhone.isNotBlank()) {
-                        onCallClick(contact.primaryPhone, contact.displayName)
-                    }
-                }
-            )
-            IosActionButton(
-                icon = Icons.Default.Email,
-                label = "mail",
-                enabled = contact.primaryEmail.isNotBlank(),
-                onClick = {
-                    if (contact.primaryEmail.isNotBlank()) {
-                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${contact.primaryEmail}"))
-                        context.startActivity(intent)
-                    }
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Phone Numbers Section
-        if (contact.phoneNumbers.isNotEmpty()) {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            // Top Navigation Bar
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    contact.phoneNumbers.forEachIndexed { index, phone ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onCallClick(phone.value, contact.displayName) }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = phone.label.lowercase(),
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = phone.value,
-                                    fontSize = 17.sp,
-                                    color = IosBlue,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Default.Call,
-                                contentDescription = "Call",
-                                tint = IosGreen,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        if (index < contact.phoneNumbers.size - 1) {
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        }
+                TextButton(
+                    onClick = onBack,
+                    modifier = Modifier.testTag("contact_detail_back_button")
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
+                            contentDescription = "Back",
+                            tint = LiquidCyan,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Contacts", color = LiquidCyan, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(14.dp))
-        }
 
-        // Email Section
-        if (contact.emails.isNotEmpty()) {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Column {
-                    contact.emails.forEachIndexed { index, email ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${email.value}"))
-                                    context.startActivity(intent)
-                                }
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                        ) {
-                            Column {
-                                Text(
-                                    text = email.label.lowercase(),
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = email.value,
-                                    fontSize = 17.sp,
-                                    color = IosBlue
-                                )
-                            }
-                        }
-                        if (index < contact.emails.size - 1) {
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        }
-                    }
+                TextButton(
+                    onClick = onEdit,
+                    modifier = Modifier.testTag("contact_detail_edit_button")
+                ) {
+                    Text(text = "Edit", color = LiquidCyan, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
-            Spacer(modifier = Modifier.height(14.dp))
-        }
 
-        // Notes Section
-        if (contact.notes.isNotBlank()) {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            // Profile Avatar & Name with Liquid Halo
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(vertical = 14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Notes",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.drawBehind {
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    LiquidCyan.copy(alpha = 0.25f),
+                                    Color.Transparent
+                                ),
+                                radius = size.width * 0.75f
+                            )
+                        )
+                    }
+                ) {
+                    IosAvatar(
+                        initials = contact.initials,
+                        colorIndex = contact.avatarColorIndex,
+                        size = 98.dp
                     )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = contact.displayName,
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LiquidTextPrimary
+                )
+                if (contact.company.isNotBlank() || contact.jobTitle.isNotBlank()) {
+                    val sub = listOf(contact.jobTitle, contact.company).filter { it.isNotBlank() }.joinToString(" • ")
                     Text(
-                        text = contact.notes,
+                        text = sub,
                         fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = LiquidCyan.copy(alpha = 0.85f),
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(14.dp))
-        }
 
-        // Action Options Card (Share vCard, Add to Favorites)
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleFavorite() }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (contact.isFavorite) Icons.Default.Star else Icons.Outlined.StarBorder,
-                        contentDescription = "Favorite",
-                        tint = if (contact.isFavorite) IosYellow else IosBlue,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = if (contact.isFavorite) "Remove from Favorites" else "Add to Favorites",
-                        color = IosBlue,
-                        fontSize = 16.sp
-                    )
-                }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    thickness = 0.5.dp,
-                    modifier = Modifier.padding(start = 48.dp)
+            // 4 iOS Liquid Glass Action Buttons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                LiquidActionButton(
+                    icon = Icons.Default.Chat,
+                    label = "message",
+                    tint = LiquidCyan,
+                    onClick = {
+                        if (contact.primaryPhone.isNotBlank()) {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("sms:${contact.primaryPhone}"))
+                            context.startActivity(intent)
+                        }
+                    }
                 )
+                LiquidActionButton(
+                    icon = Icons.Default.Call,
+                    label = "call",
+                    tint = LiquidEmerald,
+                    onClick = {
+                        if (contact.primaryPhone.isNotBlank()) {
+                            onCallClick(contact.primaryPhone, contact.displayName)
+                        }
+                    }
+                )
+                LiquidActionButton(
+                    icon = Icons.Default.Videocam,
+                    label = "video",
+                    tint = LiquidCyan,
+                    onClick = {
+                        if (contact.primaryPhone.isNotBlank()) {
+                            onCallClick(contact.primaryPhone, contact.displayName)
+                        }
+                    }
+                )
+                LiquidActionButton(
+                    icon = Icons.Default.Email,
+                    label = "mail",
+                    tint = LiquidCyan,
+                    enabled = contact.primaryEmail.isNotBlank(),
+                    onClick = {
+                        if (contact.primaryEmail.isNotBlank()) {
+                            val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${contact.primaryEmail}"))
+                            context.startActivity(intent)
+                        }
+                    }
+                )
+            }
 
-                Row(
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Phone Numbers Liquid Glass Card
+            if (contact.phoneNumbers.isNotEmpty()) {
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onShareSingleVcf() }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.IosShare,
-                        contentDescription = "Share",
-                        tint = IosBlue,
-                        modifier = Modifier.size(20.dp)
+                    Column {
+                        contact.phoneNumbers.forEachIndexed { index, phone ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onCallClick(phone.value, contact.displayName) }
+                                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = phone.label.lowercase(),
+                                        fontSize = 12.sp,
+                                        color = LiquidTextSecondary
+                                    )
+                                    Text(
+                                        text = phone.value,
+                                        fontSize = 17.sp,
+                                        color = LiquidCyan,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.Call,
+                                    contentDescription = "Call",
+                                    tint = LiquidEmerald,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            if (index < contact.phoneNumbers.size - 1) {
+                                HorizontalDivider(
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    thickness = 0.5.dp,
+                                    modifier = Modifier.padding(start = 18.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // Email Section
+            if (contact.emails.isNotEmpty()) {
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Column {
+                        contact.emails.forEachIndexed { index, email ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${email.value}"))
+                                        context.startActivity(intent)
+                                    }
+                                    .padding(horizontal = 18.dp, vertical = 14.dp)
+                            ) {
+                                Column {
+                                    Text(
+                                        text = email.label.lowercase(),
+                                        fontSize = 12.sp,
+                                        color = LiquidTextSecondary
+                                    )
+                                    Text(
+                                        text = email.value,
+                                        fontSize = 16.sp,
+                                        color = LiquidCyan
+                                    )
+                                }
+                            }
+                            if (index < contact.emails.size - 1) {
+                                HorizontalDivider(
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    thickness = 0.5.dp,
+                                    modifier = Modifier.padding(start = 18.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // Notes Section
+            if (contact.notes.isNotBlank()) {
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Text(
+                            text = "Notes",
+                            fontSize = 12.sp,
+                            color = LiquidTextSecondary
+                        )
+                        Text(
+                            text = contact.notes,
+                            fontSize = 15.sp,
+                            color = LiquidTextPrimary,
+                            modifier = Modifier.padding(top = 4.dp),
+                            lineHeight = 22.sp
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // Action Options: Favorites & Share VCF
+            LiquidGlassCard(
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onToggleFavorite() }
+                            .padding(horizontal = 18.dp, vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (contact.isFavorite) Icons.Default.Star else Icons.Outlined.StarBorder,
+                            contentDescription = "Favorite",
+                            tint = if (contact.isFavorite) IosYellow else LiquidCyan,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Text(
+                            text = if (contact.isFavorite) "Remove from Favorites" else "Add to Favorites",
+                            color = LiquidCyan,
+                            fontSize = 16.sp
+                        )
+                    }
+
+                    HorizontalDivider(
+                        color = Color.White.copy(alpha = 0.08f),
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(start = 52.dp)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Share Contact (Export vCard)",
-                        color = IosBlue,
-                        fontSize = 16.sp
-                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onShareSingleVcf() }
+                            .padding(horizontal = 18.dp, vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.IosShare,
+                            contentDescription = "Share",
+                            tint = LiquidCyan,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Text(
+                            text = "Share Contact (Export vCard)",
+                            color = LiquidCyan,
+                            fontSize = 16.sp
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Delete Contact Card
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
+            // Delete Contact in Frosted Crimson Glass
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .liquidGlass(
+                        shape = RoundedCornerShape(20.dp),
+                        borderWidth = 1.dp,
+                        bgAlpha = 0.16f,
+                        borderAlpha = 0.35f
+                    )
                     .clickable(onClick = onDelete)
-                    .padding(vertical = 14.dp)
+                    .padding(vertical = 16.dp)
                     .testTag("delete_contact_button"),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Delete Contact",
-                    color = IosRed,
+                    color = LiquidRed,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.SemiBold
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(48.dp))
+        }
     }
 }
 
 @Composable
-fun IosActionButton(
+fun LiquidActionButton(
     icon: ImageVector,
     label: String,
+    tint: Color,
     onClick: () -> Unit,
     enabled: Boolean = true
 ) {
-    val tint = if (enabled) IosBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+    val displayTint = if (enabled) tint else LiquidTextSecondary.copy(alpha = 0.4f)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 6.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .size(52.dp)
+                .liquidGlass(
+                    shape = CircleShape,
+                    borderWidth = 1.dp,
+                    bgAlpha = 0.16f,
+                    borderAlpha = 0.4f
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = tint,
-                modifier = Modifier.size(22.dp)
+                tint = displayTint,
+                modifier = Modifier.size(24.dp)
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = label,
             fontSize = 11.sp,
-            color = tint
+            color = displayTint,
+            fontWeight = FontWeight.Medium
         )
     }
 }

@@ -43,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.model.Contact
 import com.example.ui.components.IosBottomNav
 import com.example.ui.components.PhoneTab
+import com.example.ui.components.liquidGlass
 import com.example.ui.screens.ActiveCallScreen
 import com.example.ui.screens.ContactDetailScreen
 import com.example.ui.screens.ContactEditDialog
@@ -121,6 +122,7 @@ fun MainApp(viewModel: PhoneViewModel = viewModel()) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
+            containerColor = Color.Transparent,
             bottomBar = {
                 if (selectedContact == null && activeCall == null) {
                     IosBottomNav(
@@ -244,7 +246,7 @@ fun MainApp(viewModel: PhoneViewModel = viewModel()) {
         selectedContact?.let { contact ->
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
+                color = Color.Transparent
             ) {
                 ContactDetailScreen(
                     contact = contact,
@@ -301,7 +303,7 @@ fun MainApp(viewModel: PhoneViewModel = viewModel()) {
             )
         }
 
-        // Top Status Alert Banner (iOS Pill)
+        // Top Status Alert Banner (Liquid Glass Pill)
         AnimatedVisibility(
             visible = statusBanner != null,
             enter = slideInVertically { -it } + fadeIn(),
@@ -314,15 +316,20 @@ fun MainApp(viewModel: PhoneViewModel = viewModel()) {
             statusBanner?.let { msg ->
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF2C2C2E).copy(alpha = 0.95f))
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                        .liquidGlass(
+                            shape = RoundedCornerShape(26.dp),
+                            borderWidth = 1.dp,
+                            bgAlpha = 0.35f,
+                            borderAlpha = 0.6f
+                        )
+                        .background(Color(0xD90D1022))
+                        .padding(horizontal = 22.dp, vertical = 12.dp)
                 ) {
                     Text(
                         text = msg,
                         color = Color.White,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center
                     )
                 }

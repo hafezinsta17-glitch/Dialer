@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import android.text.format.DateUtils
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -24,13 +23,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.automirrored.filled.CallMissed
 import androidx.compose.material.icons.automirrored.filled.CallReceived
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,8 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.CallRecord
 import com.example.model.CallType
-import com.example.ui.theme.IosBlue
-import com.example.ui.theme.IosRed
+import com.example.ui.components.LiquidGlassBackground
+import com.example.ui.components.liquidGlass
+import com.example.ui.theme.LiquidCyan
+import com.example.ui.theme.LiquidRed
+import com.example.ui.theme.LiquidTextPrimary
+import com.example.ui.theme.LiquidTextSecondary
 import com.example.viewmodel.RecentsFilter
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -66,93 +67,99 @@ fun RecentsScreen(
         if (activeFilter == RecentsFilter.ALL) recents else recents.filter { it.type == CallType.MISSED }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-    ) {
-        // Top Header Bar with Clear button and All / Missed segmented pill
-        Row(
+    LiquidGlassBackground(modifier = modifier) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(bottom = 76.dp)
         ) {
-            TextButton(
-                onClick = onClearAll,
-                enabled = recents.isNotEmpty(),
-                modifier = Modifier.testTag("clear_recents_button")
-            ) {
-                Text(
-                    text = "Clear",
-                    color = if (recents.isNotEmpty()) IosBlue else IosBlue.copy(alpha = 0.3f),
-                    fontSize = 17.sp
-                )
-            }
-
-            // iOS Segmented Control
-            SegmentedControl(
-                filter = activeFilter,
-                onFilterSelected = onFilterChange
-            )
-
-            // Balance placeholder
-            Spacer(modifier = Modifier.width(60.dp))
-        }
-
-        Text(
-            text = "Recents",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-        )
-
-        if (filteredList.isEmpty()) {
-            Box(
+            // Top Header Bar with Clear button and Segmented Control
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .size(70.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Phone,
-                            contentDescription = "No Calls",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(14.dp))
+                TextButton(
+                    onClick = onClearAll,
+                    enabled = recents.isNotEmpty(),
+                    modifier = Modifier.testTag("clear_recents_button")
+                ) {
                     Text(
-                        text = if (activeFilter == RecentsFilter.MISSED) "No Missed Calls" else "No Recent Calls",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text = "Clear",
+                        color = if (recents.isNotEmpty()) LiquidCyan else LiquidCyan.copy(alpha = 0.3f),
+                        fontSize = 16.sp
                     )
                 }
+
+                // Liquid Glass Segmented Control
+                LiquidSegmentedControl(
+                    filter = activeFilter,
+                    onFilterSelected = onFilterChange
+                )
+
+                Spacer(modifier = Modifier.width(60.dp))
             }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(filteredList, key = { it.id }) { call ->
-                    RecentCallRow(
-                        call = call,
-                        onClick = { onCallClick(call.number, call.name) },
-                        onInfoClick = { onInfoClick(call.number, call.name) }
-                    )
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
-                        thickness = 0.5.dp,
-                        modifier = Modifier.padding(start = 48.dp)
-                    )
+
+            Text(
+                text = "Recents",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = LiquidTextPrimary,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+            )
+
+            if (filteredList.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(76.dp)
+                                .liquidGlass(
+                                    shape = CircleShape,
+                                    borderWidth = 1.dp,
+                                    bgAlpha = 0.14f,
+                                    borderAlpha = 0.35f
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Phone,
+                                contentDescription = "No Calls",
+                                tint = LiquidTextSecondary,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (activeFilter == RecentsFilter.MISSED) "No Missed Calls" else "No Recent Calls",
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LiquidTextPrimary
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(filteredList, key = { it.id }) { call ->
+                        RecentCallRow(
+                            call = call,
+                            onClick = { onCallClick(call.number, call.name) },
+                            onInfoClick = { onInfoClick(call.number, call.name) }
+                        )
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.08f),
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(start = 54.dp)
+                        )
+                    }
                 }
             }
         }
@@ -160,23 +167,27 @@ fun RecentsScreen(
 }
 
 @Composable
-fun SegmentedControl(
+fun LiquidSegmentedControl(
     filter: RecentsFilter,
     onFilterSelected: (RecentsFilter) -> Unit
 ) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(2.dp)
+            .liquidGlass(
+                shape = RoundedCornerShape(20.dp),
+                borderWidth = 1.dp,
+                bgAlpha = 0.12f,
+                borderAlpha = 0.35f
+            )
+            .padding(3.dp)
     ) {
         Row {
-            SegmentItem(
+            LiquidSegmentItem(
                 title = "All",
                 isSelected = filter == RecentsFilter.ALL,
                 onClick = { onFilterSelected(RecentsFilter.ALL) }
             )
-            SegmentItem(
+            LiquidSegmentItem(
                 title = "Missed",
                 isSelected = filter == RecentsFilter.MISSED,
                 onClick = { onFilterSelected(RecentsFilter.MISSED) }
@@ -186,28 +197,37 @@ fun SegmentedControl(
 }
 
 @Composable
-fun SegmentItem(
+fun LiquidSegmentItem(
     title: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent)
+            .clip(RoundedCornerShape(16.dp))
+            .then(
+                if (isSelected) {
+                    Modifier.liquidGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        borderWidth = 1.dp,
+                        bgAlpha = 0.35f,
+                        borderAlpha = 0.60f
+                    )
+                } else Modifier
+            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 18.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = title,
             fontSize = 13.sp,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurface
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) LiquidTextPrimary else LiquidTextSecondary
         )
     }
 }
@@ -220,7 +240,6 @@ fun RecentCallRow(
 ) {
     val isMissed = call.type == CallType.MISSED
     val timeFormatted = remember(call.timestamp) {
-        val now = System.currentTimeMillis()
         if (DateUtils.isToday(call.timestamp)) {
             SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(call.timestamp))
         } else {
@@ -232,10 +251,9 @@ fun RecentCallRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 11.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Arrow status indicator
         Icon(
             imageVector = when (call.type) {
                 CallType.OUTGOING -> Icons.AutoMirrored.Filled.CallMade
@@ -243,8 +261,8 @@ fun RecentCallRow(
                 CallType.MISSED -> Icons.AutoMirrored.Filled.CallMissed
             },
             contentDescription = call.type.name,
-            tint = if (isMissed) IosRed else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(16.dp)
+            tint = if (isMissed) LiquidRed else LiquidCyan,
+            modifier = Modifier.size(17.dp)
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -252,21 +270,21 @@ fun RecentCallRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = call.name,
-                fontSize = 17.sp,
-                fontWeight = if (isMissed) FontWeight.Bold else FontWeight.Normal,
-                color = if (isMissed) IosRed else MaterialTheme.colorScheme.onBackground
+                fontSize = 16.sp,
+                fontWeight = if (isMissed) FontWeight.Bold else FontWeight.Medium,
+                color = if (isMissed) LiquidRed else LiquidTextPrimary
             )
             Text(
                 text = call.number,
                 fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = LiquidTextSecondary
             )
         }
 
         Text(
             text = timeFormatted,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp,
+            color = LiquidTextSecondary,
             modifier = Modifier.padding(end = 8.dp)
         )
 
@@ -277,7 +295,7 @@ fun RecentCallRow(
             Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = "Call Info",
-                tint = IosBlue,
+                tint = LiquidCyan,
                 modifier = Modifier.size(22.dp)
             )
         }

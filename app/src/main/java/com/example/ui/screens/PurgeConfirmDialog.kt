@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,21 +11,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.GroupRemove
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,15 +32,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.ui.theme.IosBlue
-import com.example.ui.theme.IosRed
+import com.example.ui.components.liquidGlass
+import com.example.ui.theme.LiquidCyan
+import com.example.ui.theme.LiquidRed
+import com.example.ui.theme.LiquidTextPrimary
+import com.example.ui.theme.LiquidTextSecondary
 import com.example.viewmodel.PurgeDialogType
 
 @Composable
@@ -59,23 +61,37 @@ fun PurgeConfirmDialog(
     val canProceed = if (isPurgeAll) confirmationWord.trim().uppercase() == "PURGE" else true
 
     Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .liquidGlass(
+                    shape = RoundedCornerShape(26.dp),
+                    borderWidth = 1.2.dp,
+                    bgAlpha = 0.28f,
+                    borderAlpha = 0.6f
+                )
+                .background(Color(0xE60F1328))
+                .padding(24.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Warning Icon
+                // Glowing Warning Orb
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(60.dp)
                         .clip(CircleShape)
-                        .background(IosRed.copy(alpha = 0.15f)),
+                        .background(
+                            if (type == PurgeDialogType.CLEAN_DUPLICATES) LiquidCyan.copy(alpha = 0.18f)
+                            else LiquidRed.copy(alpha = 0.18f)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (type == PurgeDialogType.CLEAN_DUPLICATES) LiquidCyan.copy(alpha = 0.5f)
+                            else LiquidRed.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -85,12 +101,12 @@ fun PurgeConfirmDialog(
                             PurgeDialogType.CLEAN_DUPLICATES -> Icons.Default.CleaningServices
                         },
                         contentDescription = null,
-                        tint = if (type == PurgeDialogType.CLEAN_DUPLICATES) IosBlue else IosRed,
-                        modifier = Modifier.size(30.dp)
+                        tint = if (type == PurgeDialogType.CLEAN_DUPLICATES) LiquidCyan else LiquidRed,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 val title = when (type) {
                     PurgeDialogType.PURGE_ALL -> "Purge All Phone Contacts?"
@@ -100,46 +116,52 @@ fun PurgeConfirmDialog(
 
                 Text(
                     text = title,
-                    fontSize = 19.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = LiquidTextPrimary,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 val message = when (type) {
                     PurgeDialogType.PURGE_ALL ->
-                        "This will permanently delete all $totalCount contacts from your device address book. This action cannot be undone."
+                        "This will permanently erase all $totalCount contacts from your device Contacts Provider. This operation cannot be undone."
                     PurgeDialogType.PURGE_SELECTED ->
-                        "This will permanently remove the $selectedCount selected contacts from your phone. Are you sure you want to proceed?"
+                        "This will permanently remove the $selectedCount selected contacts from your device address book."
                     PurgeDialogType.CLEAN_DUPLICATES ->
-                        "This will scan your contact list for duplicate names and phone numbers, merging entries and purging duplicates."
+                        "This will merge duplicate names and numbers, purging redundant entries."
                 }
 
                 Text(
                     text = message,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = LiquidTextSecondary,
                     textAlign = TextAlign.Center,
                     lineHeight = 20.sp
                 )
 
-                // Extra security check for Purge All
+                // Extra safety check for Purge All
                 if (isPurgeAll) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Type \"PURGE\" to confirm:",
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = IosRed
+                        fontWeight = FontWeight.Bold,
+                        color = LiquidRed
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = confirmationWord,
                         onValueChange = { confirmationWord = it },
                         singleLine = true,
-                        placeholder = { Text("PURGE") },
+                        placeholder = { Text("PURGE", color = LiquidTextSecondary.copy(alpha = 0.5f)) },
+                        textStyle = TextStyle(color = LiquidTextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = LiquidRed,
+                            unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                            cursorColor = LiquidRed
+                        ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("purge_confirm_text_input")
@@ -156,22 +178,22 @@ fun PurgeConfirmDialog(
                         onClick = onDismiss,
                         modifier = Modifier
                             .weight(1f)
-                            .height(46.dp)
+                            .height(48.dp)
                             .testTag("purge_cancel_button")
                     ) {
-                        Text(text = "Cancel", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                        Text(text = "Cancel", fontSize = 16.sp, color = LiquidTextSecondary)
                     }
 
                     Button(
                         onClick = onConfirm,
                         enabled = canProceed,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (type == PurgeDialogType.CLEAN_DUPLICATES) IosBlue else IosRed
+                            containerColor = if (type == PurgeDialogType.CLEAN_DUPLICATES) LiquidCyan else LiquidRed
                         ),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1f)
-                            .height(46.dp)
+                            .height(48.dp)
                             .testTag("purge_confirm_button")
                     ) {
                         Text(

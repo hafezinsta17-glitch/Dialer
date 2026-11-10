@@ -1,6 +1,6 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.RemoveCircle
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -41,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,9 +46,13 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.model.Contact
 import com.example.model.ContactDetail
 import com.example.ui.components.IosAvatar
-import com.example.ui.theme.IosBlue
-import com.example.ui.theme.IosGreen
-import com.example.ui.theme.IosRed
+import com.example.ui.components.LiquidGlassBackground
+import com.example.ui.components.LiquidGlassCard
+import com.example.ui.theme.LiquidCyan
+import com.example.ui.theme.LiquidEmerald
+import com.example.ui.theme.LiquidRed
+import com.example.ui.theme.LiquidTextPrimary
+import com.example.ui.theme.LiquidTextSecondary
 import kotlin.math.abs
 
 @Composable
@@ -98,22 +99,18 @@ fun ContactEditDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .statusBarsPadding()
-        ) {
+        LiquidGlassBackground {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
                     .verticalScroll(rememberScrollState())
             ) {
                 // Top Header Bar
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -121,14 +118,14 @@ fun ContactEditDialog(
                         onClick = onDismiss,
                         modifier = Modifier.testTag("edit_contact_cancel_button")
                     ) {
-                        Text(text = "Cancel", color = IosBlue, fontSize = 17.sp)
+                        Text(text = "Cancel", color = LiquidCyan, fontSize = 16.sp)
                     }
 
                     Text(
                         text = if (isNewContact) "New Contact" else "Edit Contact",
                         fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        fontWeight = FontWeight.Bold,
+                        color = LiquidTextPrimary
                     )
 
                     TextButton(
@@ -160,8 +157,8 @@ fun ContactEditDialog(
                     ) {
                         Text(
                             text = "Done",
-                            color = if (firstName.isNotBlank() || lastName.isNotBlank() || phoneNumbers.any { it.isNotBlank() }) IosBlue else IosBlue.copy(alpha = 0.3f),
-                            fontSize = 17.sp,
+                            color = if (firstName.isNotBlank() || lastName.isNotBlank() || phoneNumbers.any { it.isNotBlank() }) LiquidCyan else LiquidCyan.copy(alpha = 0.3f),
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -183,42 +180,41 @@ fun ContactEditDialog(
                     IosAvatar(
                         initials = initials,
                         colorIndex = abs(displayName.hashCode()) % 8,
-                        size = 80.dp
+                        size = 84.dp
                     )
                 }
 
-                // Names Card
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                // Names Liquid Glass Card
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
                     Column {
-                        IosInputField(
+                        LiquidInputField(
                             label = "First name",
                             value = firstName,
                             onValueChange = { firstName = it },
                             testTag = "input_first_name"
                         )
                         HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            color = Color.White.copy(alpha = 0.08f),
                             thickness = 0.5.dp,
                             modifier = Modifier.padding(start = 16.dp)
                         )
-                        IosInputField(
+                        LiquidInputField(
                             label = "Last name",
                             value = lastName,
                             onValueChange = { lastName = it },
                             testTag = "input_last_name"
                         )
                         HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            color = Color.White.copy(alpha = 0.08f),
                             thickness = 0.5.dp,
                             modifier = Modifier.padding(start = 16.dp)
                         )
-                        IosInputField(
+                        LiquidInputField(
                             label = "Company",
                             value = company,
                             onValueChange = { company = it },
@@ -227,10 +223,9 @@ fun ContactEditDialog(
                     }
                 }
 
-                // Phone numbers card
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                // Phone Numbers Liquid Glass Card
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -252,13 +247,13 @@ fun ContactEditDialog(
                                         Icon(
                                             imageVector = Icons.Default.RemoveCircle,
                                             contentDescription = "Remove phone",
-                                            tint = IosRed,
+                                            tint = LiquidRed,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
                                 }
                                 Box(modifier = Modifier.weight(1f)) {
-                                    IosInputField(
+                                    LiquidInputField(
                                         label = if (index == 0) "Mobile phone" else "Phone ${index + 1}",
                                         value = phone,
                                         onValueChange = { newVal ->
@@ -270,7 +265,7 @@ fun ContactEditDialog(
                             }
                             if (index < phoneNumbers.size - 1) {
                                 HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                    color = Color.White.copy(alpha = 0.08f),
                                     thickness = 0.5.dp,
                                     modifier = Modifier.padding(start = 16.dp)
                                 )
@@ -291,37 +286,36 @@ fun ContactEditDialog(
                                 Icon(
                                     imageVector = Icons.Default.AddCircle,
                                     contentDescription = "Add phone",
-                                    tint = IosGreen,
+                                    tint = LiquidEmerald,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = "add phone", color = IosBlue, fontSize = 15.sp)
+                                Text(text = "add phone", color = LiquidCyan, fontSize = 15.sp)
                             }
                         }
                     }
                 }
 
                 // Email & Job Title Card
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
                     Column {
-                        IosInputField(
+                        LiquidInputField(
                             label = "Email",
                             value = email,
                             onValueChange = { email = it },
                             testTag = "input_email"
                         )
                         HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            color = Color.White.copy(alpha = 0.08f),
                             thickness = 0.5.dp,
                             modifier = Modifier.padding(start = 16.dp)
                         )
-                        IosInputField(
+                        LiquidInputField(
                             label = "Job title",
                             value = jobTitle,
                             onValueChange = { jobTitle = it },
@@ -331,14 +325,13 @@ fun ContactEditDialog(
                 }
 
                 // Notes Card
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
-                    IosInputField(
+                    LiquidInputField(
                         label = "Notes",
                         value = notes,
                         onValueChange = { notes = it },
@@ -347,10 +340,9 @@ fun ContactEditDialog(
                     )
                 }
 
-                // Save to Device toggle
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                // Save to Device toggle in Liquid Glass Card
+                LiquidGlassCard(
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -358,7 +350,7 @@ fun ContactEditDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -366,13 +358,13 @@ fun ContactEditDialog(
                             Text(
                                 text = "Save to Android Contacts",
                                 fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                fontWeight = FontWeight.SemiBold,
+                                color = LiquidTextPrimary
                             )
                             Text(
-                                text = "Syncs with Android system address book",
+                                text = "Synchronizes with device address book",
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = LiquidTextSecondary
                             )
                         }
                         Switch(
@@ -380,20 +372,20 @@ fun ContactEditDialog(
                             onCheckedChange = { saveToDevice = it },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
-                                checkedTrackColor = IosGreen
+                                checkedTrackColor = LiquidEmerald
                             )
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(48.dp))
             }
         }
     }
 }
 
 @Composable
-fun IosInputField(
+fun LiquidInputField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -404,15 +396,20 @@ fun IosInputField(
         value = value,
         onValueChange = onValueChange,
         placeholder = {
-            Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+            Text(text = label, color = LiquidTextSecondary.copy(alpha = 0.6f))
         },
+        textStyle = TextStyle(
+            color = LiquidTextPrimary,
+            fontSize = 16.sp
+        ),
         singleLine = singleLine,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
             disabledContainerColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = LiquidCyan
         ),
         modifier = Modifier
             .fillMaxWidth()
