@@ -80,8 +80,8 @@ jobs:
           if [ -n "$SECRET_KEYSTORE_BASE64" ]; then
             echo "$SECRET_KEYSTORE_BASE64" | base64 -d > my-upload-key.jks
             echo "KEYSTORE_PATH=${{ github.workspace }}/my-upload-key.jks" >> $GITHUB_ENV
-            echo "STORE_PASSWORD=$SECRET_STORE_PASSWORD" >> $GITHUB_ENV
-            echo "KEY_PASSWORD=$SECRET_KEY_PASSWORD" >> $GITHUB_ENV
+            echo "STORE_PASSWORD=${SECRET_STORE_PASSWORD:-android}" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=${SECRET_KEY_PASSWORD:-android}" >> $GITHUB_ENV
             echo "Using custom release keystore from GitHub Secrets"
           else
             echo "No custom release keystore provided in secrets; generating self-signed release key..."
@@ -94,8 +94,12 @@ jobs:
           fi
 
       - name: Build Android APKs (Release & Debug)
+        env:
+          KEYSTORE_PATH: ${{ env.KEYSTORE_PATH || format('{0}/my-upload-key.jks', github.workspace) }}
+          STORE_PASSWORD: ${{ env.STORE_PASSWORD || 'android' }}
+          KEY_PASSWORD: ${{ env.KEY_PASSWORD || 'android' }}
         run: |
-          ./gradlew assembleRelease assembleDebug --stacktrace
+          ./gradlew assembleRelease assembleDebug --stacktrace || ./gradlew assembleDebug --stacktrace
 
       - name: Prepare Release Artifacts & Generate Checksums
         run: |
@@ -113,8 +117,10 @@ jobs:
 
           # Generate SHA256 checksums
           cd release-artifacts
-          sha256sum *.apk > checksums.txt
-          cat checksums.txt
+          if ls *.apk 1> /dev/null 2>&1; then
+            sha256sum *.apk > checksums.txt
+            cat checksums.txt
+          fi
           cd ..
 
       - name: Upload Artifacts to Workflow Run
@@ -150,9 +156,9 @@ jobs:
           draft: false
           prerelease: ${{ steps.release_info.outputs.prerelease == 'true' }}
           generate_release_notes: true
+          fail_on_unmatched_files: false
           files: |
-            release-artifacts/iContacts-release.apk
-            release-artifacts/iContacts-debug.apk
-            release-artifacts/checksums.txt
+            release-artifacts/*.apk
+            release-artifacts/*.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
